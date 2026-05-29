@@ -5,9 +5,15 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DatabaseConnection {
-    private static final String URL = "jdbc:mysql://localhost:3306/pinturadb";
-    private static final String USER = "root";
-    private static final String PASSWORD = "2439";
+    private static final String DEFAULT_URL =
+            "jdbc:mysql://localhost:3306/pinturadb?useSSL=false&allowPublicKeyRetrieval=true"
+                    + "&serverTimezone=America/Mexico_City&useUnicode=true&characterEncoding=UTF-8";
+    private static final String DEFAULT_USER = "root";
+    private static final String DEFAULT_PASSWORD = "2439";
+
+    private static final String URL = getConfig("IPESA_DB_URL", DEFAULT_URL);
+    private static final String USER = getConfig("IPESA_DB_USER", DEFAULT_USER);
+    private static final String PASSWORD = getConfig("IPESA_DB_PASSWORD", DEFAULT_PASSWORD);
 
     private static Connection connection;
 
@@ -39,5 +45,13 @@ public class DatabaseConnection {
         } catch (SQLException e) {
             System.err.println("Error al cerrar conexion: " + e.getMessage());
         }
+    }
+
+    private static String getConfig(String key, String defaultValue) {
+        String value = System.getenv(key);
+        if (value == null || value.trim().isEmpty()) {
+            return defaultValue;
+        }
+        return value.trim();
     }
 }

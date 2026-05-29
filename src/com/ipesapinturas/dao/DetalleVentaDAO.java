@@ -15,8 +15,7 @@ public class DetalleVentaDAO {
 
     public boolean guardar(int ventaId, int productoId, int cantidad,
                            double precioUnitario, double subtotal) {
-        String sql = "INSERT INTO detalles_venta " +
-                "(venta_id, producto_id, cantidad, precio_unitario, subtotal) " +
+        String sql = "INSERT INTO ticket (folio, idPintura, cantidad, precio, importe) " +
                 "VALUES (?, ?, ?, ?, ?)";
 
         try (Connection conn = DatabaseConnection.getConnection();
@@ -36,11 +35,12 @@ public class DetalleVentaDAO {
 
     public List<Map<String, Object>> obtenerDetallesPorVenta(int ventaId) {
         List<Map<String, Object>> detalles = new ArrayList<>();
-        String sql = "SELECT dv.*, p.nombre, p.color " +
-                "FROM detalles_venta dv " +
-                "INNER JOIN productos p ON dv.producto_id = p.id " +
-                "WHERE dv.venta_id = ? " +
-                "ORDER BY dv.id";
+        String sql = "SELECT t.idTicket AS id, t.folio AS venta_id, t.idPintura AS producto_id, " +
+                "p.nombre, p.color, t.cantidad, t.precio AS precio_unitario, t.importe AS subtotal " +
+                "FROM ticket t " +
+                "INNER JOIN pintura p ON t.idPintura = p.idPintura " +
+                "WHERE t.folio = ? " +
+                "ORDER BY t.idTicket";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -68,11 +68,11 @@ public class DetalleVentaDAO {
 
     public List<Map<String, Object>> obtenerProductosMasVendidos(int limite) {
         List<Map<String, Object>> productos = new ArrayList<>();
-        String sql = "SELECT p.id, p.nombre, p.color, SUM(dv.cantidad) AS cantidad_vendida, " +
-                "SUM(dv.subtotal) AS total_vendido " +
-                "FROM detalles_venta dv " +
-                "INNER JOIN productos p ON dv.producto_id = p.id " +
-                "GROUP BY p.id, p.nombre, p.color " +
+        String sql = "SELECT p.idPintura AS id, p.nombre, p.color, " +
+                "SUM(t.cantidad) AS cantidad_vendida, SUM(t.importe) AS total_vendido " +
+                "FROM ticket t " +
+                "INNER JOIN pintura p ON t.idPintura = p.idPintura " +
+                "GROUP BY p.idPintura, p.nombre, p.color " +
                 "ORDER BY cantidad_vendida DESC " +
                 "LIMIT ?";
 
@@ -98,7 +98,7 @@ public class DetalleVentaDAO {
     }
 
     public boolean eliminar(int detalleId) {
-        String sql = "DELETE FROM detalles_venta WHERE id = ?";
+        String sql = "DELETE FROM ticket WHERE idTicket = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -112,7 +112,7 @@ public class DetalleVentaDAO {
     }
 
     public boolean eliminarPorVenta(int ventaId) {
-        String sql = "DELETE FROM detalles_venta WHERE venta_id = ?";
+        String sql = "DELETE FROM ticket WHERE folio = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -126,7 +126,7 @@ public class DetalleVentaDAO {
     }
 
     public int contarPorVenta(int ventaId) {
-        String sql = "SELECT COUNT(*) AS total FROM detalles_venta WHERE venta_id = ?";
+        String sql = "SELECT COUNT(*) AS total FROM ticket WHERE folio = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {

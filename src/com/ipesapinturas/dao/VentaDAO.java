@@ -3,20 +3,31 @@ package com.ipesapinturas.dao;
 import com.ipesapinturas.models.Venta;
 import com.ipesapinturas.utils.DatabaseConnection;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 public class VentaDAO {
+    private static final String SELECT_BASE =
+            "SELECT v.folio AS id, CAST(v.folio AS CHAR) AS folio, v.fecha, " +
+                    "v.idCliente AS cliente_id, " +
+                    "TRIM(CONCAT_WS(' ', c.nombre, c.apellidoP, c.apellidoM)) AS cliente_nombre, " +
+                    "v.idEmpleado AS usuario_id, " +
+                    "TRIM(CONCAT_WS(' ', e.nombre, e.apellidoP, e.apellidoM)) AS usuario_nombre, " +
+                    "v.montoTotal AS total, 'Completada' AS estado, NULL AS fecha_creacion " +
+                    "FROM venta v " +
+                    "LEFT JOIN cliente c ON v.idCliente = c.idCliente " +
+                    "LEFT JOIN empleado e ON v.idEmpleado = e.idEmpleado ";
 
     public List<Venta> obtenerTodas() {
         List<Venta> ventas = new ArrayList<>();
-        String sql = "SELECT v.*, c.nombre_completo as cliente_nombre, u.nombre_completo as usuario_nombre " +
-                "FROM ventas v " +
-                "LEFT JOIN clientes c ON v.cliente_id = c.id " +
-                "LEFT JOIN usuarios u ON v.usuario_id = u.id " +
-                "ORDER BY v.fecha DESC";
+        String sql = SELECT_BASE + "ORDER BY v.fecha DESC, v.folio DESC";
 
         try (Connection conn = DatabaseConnection.getConnection();
              Statement stmt = conn.createStatement();
@@ -32,11 +43,7 @@ public class VentaDAO {
     }
 
     public Venta obtenerPorId(int id) {
-        String sql = "SELECT v.*, c.nombre_completo as cliente_nombre, u.nombre_completo as usuario_nombre " +
-                "FROM ventas v " +
-                "LEFT JOIN clientes c ON v.cliente_id = c.id " +
-                "LEFT JOIN usuarios u ON v.usuario_id = u.id " +
-                "WHERE v.id = ?";
+        String sql = SELECT_BASE + "WHERE v.folio = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -55,12 +62,8 @@ public class VentaDAO {
 
     public List<Venta> obtenerPorFecha(LocalDate fechaInicio, LocalDate fechaFin) {
         List<Venta> ventas = new ArrayList<>();
-        String sql = "SELECT v.*, c.nombre_completo as cliente_nombre, u.nombre_completo as usuario_nombre " +
-                "FROM ventas v " +
-                "LEFT JOIN clientes c ON v.cliente_id = c.id " +
-                "LEFT JOIN usuarios u ON v.usuario_id = u.id " +
-                "WHERE DATE(v.fecha) BETWEEN ? AND ? " +
-                "ORDER BY v.fecha DESC";
+        String sql = SELECT_BASE +
+                "WHERE v.fecha BETWEEN ? AND ? ORDER BY v.fecha DESC, v.folio DESC";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -80,11 +83,7 @@ public class VentaDAO {
 
     public List<Venta> obtenerPorCliente(int clienteId) {
         List<Venta> ventas = new ArrayList<>();
-        String sql = "SELECT v.*, c.nombre_completo as cliente_nombre, u.nombre_completo as usuario_nombre " +
-                "FROM ventas v " +
-                "LEFT JOIN clientes c ON v.cliente_id = c.id " +
-                "LEFT JOIN usuarios u ON v.usuario_id = u.id " +
-                "WHERE v.cliente_id = ? ORDER BY v.fecha DESC";
+        String sql = SELECT_BASE + "WHERE v.idCliente = ? ORDER BY v.fecha DESC, v.folio DESC";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -105,33 +104,31 @@ public class VentaDAO {
         try (Connection conn = DatabaseConnection.getConnection();
              Statement stmt = conn.createStatement()) {
 
-            // Obtiene el último folio y suma 1
             ResultSet rs = stmt.executeQuery(
-                    "SELECT COALESCE(MAX(CAST(SUBSTRING(folio, 2) AS UNSIGNED)), 20240000000) + 1 as siguiente FROM ventas"
+                    "SELECT COALESCE(MAX(folio), 2024000000) + 1 AS siguiente FROM venta"
             );
 
             if (rs.next()) {
-                return "#" + rs.getLong("siguiente");
+                return String.valueOf(rs.getLong("siguiente"));
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return "#20240000001";
+        return "2024000001";
     }
 
     public boolean guardar(Venta venta) {
-        String sql = "INSERT INTO ventas (folio, fecha, cliente_id, usuario_id, total, estado) " +
-                "VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO venta (folio, fecha, idCliente, idEmpleado, montoTotal) " +
+                "VALUES (?, ?, ?, ?, ?)";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            pstmt.setString(1, venta.getFolio());
+            pstmt.setInt(1, folioNumerico(venta.getFolio()));
             pstmt.setDate(2, java.sql.Date.valueOf(venta.getFecha()));
             pstmt.setInt(3, venta.getClienteId());
             pstmt.setInt(4, venta.getUsuarioId());
             pstmt.setDouble(5, venta.getTotal());
-            pstmt.setString(6, venta.getEstado());
 
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -141,8 +138,8 @@ public class VentaDAO {
     }
 
     public boolean actualizar(Venta venta) {
-        String sql = "UPDATE ventas SET fecha = ?, cliente_id = ?, usuario_id = ?, " +
-                "total = ?, estado = ? WHERE id = ?";
+        String sql = "UPDATE venta SET fecha = ?, idCliente = ?, idEmpleado = ?, montoTotal = ? " +
+                "WHERE folio = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -151,8 +148,7 @@ public class VentaDAO {
             pstmt.setInt(2, venta.getClienteId());
             pstmt.setInt(3, venta.getUsuarioId());
             pstmt.setDouble(4, venta.getTotal());
-            pstmt.setString(5, venta.getEstado());
-            pstmt.setInt(6, venta.getId());
+            pstmt.setInt(5, folioNumerico(venta.getFolio()));
 
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -162,27 +158,51 @@ public class VentaDAO {
     }
 
     public boolean eliminar(int id) {
-        String sql = "DELETE FROM ventas WHERE id = ?";
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        Connection conn = DatabaseConnection.getConnection();
+        if (conn == null) {
+            return false;
+        }
 
-            pstmt.setInt(1, id);
-            return pstmt.executeUpdate() > 0;
+        boolean autoCommitOriginal = true;
+        try {
+            autoCommitOriginal = conn.getAutoCommit();
+            conn.setAutoCommit(false);
+
+            try (PreparedStatement detalle = conn.prepareStatement("DELETE FROM ticket WHERE folio = ?")) {
+                detalle.setInt(1, id);
+                detalle.executeUpdate();
+            }
+
+            int eliminadas;
+            try (PreparedStatement venta = conn.prepareStatement("DELETE FROM venta WHERE folio = ?")) {
+                venta.setInt(1, id);
+                eliminadas = venta.executeUpdate();
+            }
+
+            conn.commit();
+            return eliminadas > 0;
         } catch (SQLException e) {
+            rollback(conn);
             e.printStackTrace();
+        } finally {
+            try {
+                conn.setAutoCommit(autoCommitOriginal);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
         return false;
     }
 
-    public double obtenerTotalVentasMes(int mes, int año) {
-        String sql = "SELECT COALESCE(SUM(total), 0) as total FROM ventas " +
-                "WHERE MONTH(fecha) = ? AND YEAR(fecha) = ? AND estado = 'Completada'";
+    public double obtenerTotalVentasMes(int mes, int anio) {
+        String sql = "SELECT COALESCE(SUM(montoTotal), 0) AS total FROM venta " +
+                "WHERE MONTH(fecha) = ? AND YEAR(fecha) = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setInt(1, mes);
-            pstmt.setInt(2, año);
+            pstmt.setInt(2, anio);
 
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
@@ -198,7 +218,10 @@ public class VentaDAO {
         Venta venta = new Venta();
         venta.setId(rs.getInt("id"));
         venta.setFolio(rs.getString("folio"));
-        venta.setFecha(rs.getDate("fecha").toLocalDate());
+        java.sql.Date fecha = rs.getDate("fecha");
+        if (fecha != null) {
+            venta.setFecha(fecha.toLocalDate());
+        }
         venta.setClienteId(rs.getInt("cliente_id"));
         venta.setClienteNombre(rs.getString("cliente_nombre"));
         venta.setUsuarioId(rs.getInt("usuario_id"));
@@ -212,5 +235,24 @@ public class VentaDAO {
         }
 
         return venta;
+    }
+
+    private int folioNumerico(String folio) {
+        if (folio == null) {
+            return Integer.parseInt(obtenerProximoFolio());
+        }
+        String limpio = folio.replaceAll("\\D", "");
+        if (limpio.isEmpty()) {
+            return Integer.parseInt(obtenerProximoFolio());
+        }
+        return Integer.parseInt(limpio);
+    }
+
+    private void rollback(Connection conn) {
+        try {
+            conn.rollback();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

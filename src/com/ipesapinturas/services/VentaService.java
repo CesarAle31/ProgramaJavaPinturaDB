@@ -12,7 +12,6 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -47,12 +46,13 @@ public class VentaService {
             autoCommitOriginal = conn.getAutoCommit();
             conn.setAutoCommit(false);
 
-            int ventaId = insertarVenta(conn, venta);
-            venta.setId(ventaId);
+            int folio = insertarVenta(conn, venta);
+            venta.setId(folio);
+            venta.setFolio(String.valueOf(folio));
 
             for (ProductoSeleccionado producto : productos) {
                 validarStock(conn, producto);
-                insertarDetalle(conn, ventaId, producto);
+                insertarDetalle(conn, folio, producto);
                 actualizarStock(conn, producto);
             }
 
@@ -153,39 +153,32 @@ public class VentaService {
     }
 
     private int insertarVenta(Connection conn, Venta venta) throws SQLException {
-        String sql = "INSERT INTO ventas (folio, fecha, cliente_id, usuario_id, total, estado) " +
-                "VALUES (?, ?, ?, ?, ?, ?)";
+        int folio = folioNumerico(venta.getFolio());
+        String sql = "INSERT INTO venta (folio, fecha, idCliente, idEmpleado, montoTotal) " +
+                "VALUES (?, ?, ?, ?, ?)";
 
-        try (PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            pstmt.setString(1, venta.getFolio());
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, folio);
             pstmt.setDate(2, Date.valueOf(venta.getFecha()));
             pstmt.setInt(3, venta.getClienteId());
             pstmt.setInt(4, venta.getUsuarioId());
             pstmt.setDouble(5, venta.getTotal());
-            pstmt.setString(6, venta.getEstado());
 
             if (pstmt.executeUpdate() == 0) {
                 throw new SQLException("No se inserto la venta");
             }
-
-            try (ResultSet keys = pstmt.getGeneratedKeys()) {
-                if (keys.next()) {
-                    return keys.getInt(1);
-                }
-            }
         }
 
-        throw new SQLException("No se pudo obtener el ID de la venta");
+        return folio;
     }
 
-    private void insertarDetalle(Connection conn, int ventaId, ProductoSeleccionado producto)
+    private void insertarDetalle(Connection conn, int folio, ProductoSeleccionado producto)
             throws SQLException {
-        String sql = "INSERT INTO detalles_venta " +
-                "(venta_id, producto_id, cantidad, precio_unitario, subtotal) " +
+        String sql = "INSERT INTO ticket (folio, idPintura, cantidad, precio, importe) " +
                 "VALUES (?, ?, ?, ?, ?)";
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, ventaId);
+            pstmt.setInt(1, folio);
             pstmt.setInt(2, producto.getProductoId());
             pstmt.setInt(3, producto.getCantidad());
             pstmt.setDouble(4, producto.getPrecioUnitario());
@@ -198,7 +191,7 @@ public class VentaService {
     }
 
     private void validarStock(Connection conn, ProductoSeleccionado producto) throws SQLException {
-        String sql = "SELECT stock FROM productos WHERE id = ? FOR UPDATE";
+        String sql = "SELECT stock FROM pintura WHERE idPintura = ? FOR UPDATE";
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, producto.getProductoId());
@@ -218,7 +211,7 @@ public class VentaService {
     }
 
     private void actualizarStock(Connection conn, ProductoSeleccionado producto) throws SQLException {
-        String sql = "UPDATE productos SET stock = stock - ? WHERE id = ?";
+        String sql = "UPDATE pintura SET stock = stock - ? WHERE idPintura = ?";
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, producto.getCantidad());
@@ -228,6 +221,17 @@ public class VentaService {
                 throw new SQLException("No se actualizo el stock de " + producto.getNombre());
             }
         }
+    }
+
+    private int folioNumerico(String folio) {
+        if (folio == null) {
+            return Integer.parseInt(obtenerProximoFolio());
+        }
+        String limpio = folio.replaceAll("\\D", "");
+        if (limpio.isEmpty()) {
+            return Integer.parseInt(obtenerProximoFolio());
+        }
+        return Integer.parseInt(limpio);
     }
 
     private void rollback(Connection conn) {
