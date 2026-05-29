@@ -1,0 +1,13 @@
+# Copia este archivo como db.properties y ajusta los valores a tu MySQL local.
+# El archivo db.properties real esta ignorado por Git para no guardar contrasenas.
+
+# Opcion 1: configurar por partes.
+db.host=localhost
+db.port=3306
+db.name=pinturadb
+db.user=root
+db.password=2439
+db.options=useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+
+# Opcion 2: usar una URL JDBC completa. Si se define, reemplaza host/port/name/options.
+# db.url=jdbc:mysql://localhost:3306/pinturadb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
