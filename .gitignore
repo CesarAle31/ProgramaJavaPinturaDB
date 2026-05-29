@@ -1,0 +1,33 @@
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# Archivos compilados
+bin/
+out/
+target/
+
+# Logs
+*.log
+
+# Archivos temporales
+*.tmp
+*.temp
+
+# Configuración del sistema
+.DS_Store
+Thumbs.db
+
+# Recibos generados por la aplicación
+recibos/
+
+# Archivos de respaldo
+*.bak
+
+# Variables de entorno
+.env
+
+# Base de datos local (si contiene datos de pruebas)
+*.db
+*.sqlite
+*.sqlite3
