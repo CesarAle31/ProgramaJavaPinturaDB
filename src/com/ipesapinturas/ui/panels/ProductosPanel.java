@@ -286,15 +286,15 @@ public class ProductosPanel extends JPanel {
                 producto.setStock(Integer.parseInt(stockField.getText()));
                 producto.setProveedorId(((Proveedor) proveedorCombo.getSelectedItem()).getId());
 
-                if (productoDAO.guardar(producto)) {
-                    JOptionPane.showMessageDialog(dialog, "Producto guardado correctamente");
-                    actualizarTabla();
-                    dialog.dispose();
-                } else {
-                    JOptionPane.showMessageDialog(dialog, "Error al guardar producto", "Error", JOptionPane.ERROR_MESSAGE);
-                }
+                productoDAO.agregar(producto);
+                JOptionPane.showMessageDialog(dialog, "Producto guardado correctamente");
+                refrescarTablaProductos();
+                dialog.dispose();
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(dialog, "Error en los datos ingresados", "Error", JOptionPane.ERROR_MESSAGE);
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(this, ex.getMessage(),
+                        "Error de Base de Datos", JOptionPane.ERROR_MESSAGE);
             }
         });
 
@@ -382,18 +382,18 @@ public class ProductosPanel extends JPanel {
                 productoActualizado.setStock(Integer.parseInt(stockField.getText().trim()));
                 productoActualizado.setProveedorId(obtenerProveedorIdSeleccionado(proveedorCombo));
 
-                if (productoDAO.actualizar(productoActualizado)) {
-                    JOptionPane.showMessageDialog(dialog, "Producto actualizado correctamente");
-                    idSearchField.setText(String.valueOf(producto.getId()));
-                    buscarPorId();
-                    dialog.dispose();
-                } else {
-                    JOptionPane.showMessageDialog(dialog, "Error al actualizar producto", "Error", JOptionPane.ERROR_MESSAGE);
-                }
+                productoDAO.actualizar(productoActualizado);
+                JOptionPane.showMessageDialog(dialog, "Producto actualizado correctamente");
+                idSearchField.setText(String.valueOf(producto.getId()));
+                buscarPorId();
+                dialog.dispose();
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(dialog,
                         "Costo, precio y stock deben ser valores numericos validos",
                         "Error", JOptionPane.ERROR_MESSAGE);
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(this, ex.getMessage(),
+                        "Error de Base de Datos", JOptionPane.ERROR_MESSAGE);
             }
         });
 
@@ -438,13 +438,17 @@ public class ProductosPanel extends JPanel {
         if (opcion == JOptionPane.YES_OPTION) {
             try {
                 productoDAO.eliminar(producto.getId());
-                JOptionPane.showMessageDialog(this, "Producto eliminado correctamente");
+                JOptionPane.showMessageDialog(this, "Pintura eliminada correctamente");
                 idSearchField.setText("");
-                actualizarTabla();
+                refrescarTablaProductos();
             } catch (SQLException ex) {
                 JOptionPane.showMessageDialog(this, ex.getMessage(),
-                        "Error", JOptionPane.ERROR_MESSAGE);
+                        "Error de Base de Datos", JOptionPane.ERROR_MESSAGE);
             }
         }
+    }
+
+    private void refrescarTablaProductos() {
+        actualizarTabla();
     }
 }

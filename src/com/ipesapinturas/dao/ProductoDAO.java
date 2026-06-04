@@ -3,7 +3,6 @@ package com.ipesapinturas.dao;
 import com.ipesapinturas.models.Producto;
 import com.ipesapinturas.utils.DatabaseConnection;
 
-import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -18,17 +17,12 @@ public class ProductoDAO {
                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
     private static final String SELECT_BY_ID_SQL = "SELECT * FROM pintura WHERE idPintura = ?;";
     private static final String SELECT_ALL_SQL = "SELECT * FROM pintura;";
-    private static final String COUNT_TICKETS_SQL = "SELECT COUNT(*) FROM ticket WHERE idPintura = ?;";
     private static final String DELETE_SQL = "DELETE FROM pintura WHERE idPintura = ?;";
 
-    public boolean agregar(Producto p) {
-        if (!esProductoValido(p)) {
-            return false;
-        }
-
+    public void agregar(Producto p) throws SQLException {
         try (Connection conn = DatabaseConnection.getConnection()) {
             if (conn == null) {
-                return false;
+                throw new SQLException("No se pudo obtener conexion a la base de datos.");
             }
 
             try (PreparedStatement pstmt = conn.prepareStatement(INSERT_SQL)) {
@@ -43,11 +37,11 @@ public class ProductoDAO {
                 pstmt.setBigDecimal(8, p.getCostoDecimal());
                 pstmt.setString(9, p.getPresentacion());
 
-                return pstmt.executeUpdate() > 0;
+                pstmt.executeUpdate();
             }
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            // Se relanza para que Swing muestre el mensaje del trigger MariaDB.
+            throw e;
         }
     }
 
@@ -93,23 +87,18 @@ public class ProductoDAO {
     }
 
     public void eliminar(int id) throws SQLException {
-        Connection conn = DatabaseConnection.getConnection();
-        if (conn == null) {
-            throw new SQLException("No se pudo obtener conexion a la base de datos.");
-        }
-
-        try (PreparedStatement validarStmt = conn.prepareStatement(COUNT_TICKETS_SQL)) {
-            validarStmt.setInt(1, id);
-            try (ResultSet rs = validarStmt.executeQuery()) {
-                if (rs.next() && rs.getInt(1) > 0) {
-                    throw new SQLException("No se puede eliminar porque la pintura tiene registros asociados.");
-                }
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            if (conn == null) {
+                throw new SQLException("No se pudo obtener conexion a la base de datos.");
             }
-        }
 
-        try (PreparedStatement eliminarStmt = conn.prepareStatement(DELETE_SQL)) {
-            eliminarStmt.setInt(1, id);
-            eliminarStmt.executeUpdate();
+            try (PreparedStatement eliminarStmt = conn.prepareStatement(DELETE_SQL)) {
+                eliminarStmt.setInt(1, id);
+                eliminarStmt.executeUpdate();
+            }
+        } catch (SQLException e) {
+            // Se relanza para conservar mensajes SIGNAL SQLSTATE '45000'.
+            throw e;
         }
     }
 
@@ -146,21 +135,17 @@ public class ProductoDAO {
         return productos;
     }
 
-    public boolean guardar(Producto producto) {
-        return agregar(producto);
+    public void guardar(Producto producto) throws SQLException {
+        agregar(producto);
     }
 
-    public boolean actualizar(Producto producto) {
+    public void actualizar(Producto producto) throws SQLException {
         String sql = "UPDATE pintura SET claveClasificacion = ?, idProveedor = ?, nombre = ?, " +
                 "color = ?, capacidad = ?, stock = ?, costo = ?, presentacion = ? WHERE idPintura = ?;";
 
-        if (!esProductoValido(producto) || producto.getIdPintura() <= 0) {
-            return false;
-        }
-
         try (Connection conn = DatabaseConnection.getConnection()) {
             if (conn == null) {
-                return false;
+                throw new SQLException("No se pudo obtener conexion a la base de datos.");
             }
 
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -174,11 +159,11 @@ public class ProductoDAO {
                 pstmt.setString(8, producto.getPresentacion());
                 pstmt.setInt(9, producto.getIdPintura());
 
-                return pstmt.executeUpdate() > 0;
+                pstmt.executeUpdate();
             }
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            // Se relanza para que la capa UI maneje errores de triggers.
+            throw e;
         }
     }
 
@@ -228,23 +213,6 @@ public class ProductoDAO {
         }
 
         return productos;
-    }
-
-    private boolean esProductoValido(Producto p) {
-        if (p == null) {
-            return false;
-        }
-        if (p.getNombre() == null || p.getNombre().trim().isEmpty()) {
-            return false;
-        }
-        if (p.getColor() == null || p.getColor().trim().isEmpty()) {
-            return false;
-        }
-        if (p.getStock() < 0) {
-            return false;
-        }
-        BigDecimal costo = p.getCostoDecimal();
-        return costo != null && costo.compareTo(BigDecimal.ZERO) > 0;
     }
 
     private Producto mapearProducto(ResultSet rs) throws SQLException {
