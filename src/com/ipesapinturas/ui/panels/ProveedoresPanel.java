@@ -34,7 +34,7 @@ public class ProveedoresPanel extends JPanel {
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setOpaque(false);
 
-        JLabel titleLabel = new JLabel("Gestion de Proveedores");
+        JLabel titleLabel = new JLabel("🚚 Gestión de Proveedores");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
 
         JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
@@ -47,18 +47,18 @@ public class ProveedoresPanel extends JPanel {
         JButton buscarIdButton = new JButton("Buscar ID");
         buscarIdButton.addActionListener(e -> buscarPorId());
 
-        JButton limpiarButton = new JButton("Limpiar");
+        JButton limpiarButton = new JButton("🔄 Refrescar");
         limpiarButton.addActionListener(e -> {
             idSearchField.setText("");
             actualizarTabla();
         });
 
-        JButton nuevoButton = new JButton("+ Nuevo Proveedor");
+        JButton nuevoButton = new JButton("➕ Nuevo Proveedor");
         nuevoButton.setBackground(new Color(220, 53, 69));
         nuevoButton.setForeground(Color.WHITE);
         nuevoButton.addActionListener(e -> abrirDialogoNuevo());
 
-        JButton editarButton = new JButton("Editar");
+        JButton editarButton = new JButton("✏️ Editar");
         editarButton.addActionListener(e -> abrirDialogoEditar());
 
         JButton eliminarButton = new JButton("Eliminar");
@@ -211,8 +211,8 @@ public class ProveedoresPanel extends JPanel {
         panel.add(municipioField);
 
         JPanel buttonPanel = new JPanel();
-        JButton guardarButton = new JButton("Guardar");
-        JButton cancelarButton = new JButton("Cancelar");
+        JButton guardarButton = new JButton("💾 Guardar");
+        JButton cancelarButton = new JButton("❌ Cancelar");
 
         guardarButton.addActionListener(e -> {
             Proveedor proveedor = new Proveedor();
@@ -270,8 +270,8 @@ public class ProveedoresPanel extends JPanel {
         panel.add(municipioField);
 
         JPanel buttonPanel = new JPanel();
-        JButton actualizarButton = new JButton("Actualizar");
-        JButton cancelarButton = new JButton("Cancelar");
+        JButton actualizarButton = new JButton("💾 Actualizar");
+        JButton cancelarButton = new JButton("❌ Cancelar");
 
         actualizarButton.addActionListener(e -> {
             if (razonField.getText().trim().isEmpty()) {
@@ -334,3 +334,4 @@ public class ProveedoresPanel extends JPanel {
         }
     }
 }
+

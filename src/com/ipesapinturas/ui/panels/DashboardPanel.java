@@ -19,7 +19,7 @@ public class DashboardPanel extends JPanel {
         setBackground(new Color(240, 240, 240));
 
         // Panel de título
-        JLabel titleLabel = new JLabel("Dashboard");
+        JLabel titleLabel = new JLabel("🏠 Dashboard");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 28));
         titleLabel.setForeground(new Color(45, 45, 48));
         add(titleLabel, BorderLayout.NORTH);
@@ -49,12 +49,12 @@ public class DashboardPanel extends JPanel {
         int productosStockBajo = productoDAO.obtenerStockBajo(5).size();
 
         // Cards de estadísticas
-        statsPanel.add(crearCard("📦 Productos", String.valueOf(totalProductos), new Color(52, 152, 219)));
-        statsPanel.add(crearCard("👥 Clientes Activos", String.valueOf(totalClientes), new Color(46, 204, 113)));
-        statsPanel.add(crearCard("🏭 Proveedores", String.valueOf(totalProveedores), new Color(155, 89, 182)));
+        statsPanel.add(crearCard("➕ Productos", String.valueOf(totalProductos), new Color(52, 152, 219)));
+        statsPanel.add(crearCard("👤 Clientes Activos", String.valueOf(totalClientes), new Color(46, 204, 113)));
+        statsPanel.add(crearCard("🚚 Proveedores", String.valueOf(totalProveedores), new Color(155, 89, 182)));
         statsPanel.add(crearCard("🛒 Ventas Hoy", String.valueOf(ventasHoy), new Color(230, 126, 34)));
-        statsPanel.add(crearCard("💰 Ingresos del Mes", formatearMoneda(ingresosMes), new Color(220, 53, 69)));
-        statsPanel.add(crearCard("⚠️ Stock Bajo", String.valueOf(productosStockBajo), new Color(241, 196, 15)));
+        statsPanel.add(crearCard("📊 Ingresos del Mes", formatearMoneda(ingresosMes), new Color(220, 53, 69)));
+        statsPanel.add(crearCard("🔄 Stock Bajo", String.valueOf(productosStockBajo), new Color(241, 196, 15)));
 
         return statsPanel;
     }

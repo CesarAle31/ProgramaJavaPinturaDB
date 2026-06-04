@@ -94,7 +94,7 @@ public class NuevaVentaFrame extends JFrame {
         productoCombo = new JComboBox<>();
         cantidadSpinner = new JSpinner(new SpinnerNumberModel(1, 1, 999, 1));
 
-        JButton agregarButton = crearBotonPrimario("Agregar al carrito");
+        JButton agregarButton = crearBotonPrimario("🛒 Agregar al carrito");
         agregarButton.addActionListener(e -> agregarProducto());
 
         agregarCampo(panel, gbc, 0, 0, "Folio:", folioLabel);
@@ -134,10 +134,10 @@ public class NuevaVentaFrame extends JFrame {
         JPanel accionesPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         accionesPanel.setOpaque(false);
 
-        JButton quitarButton = new JButton("Quitar producto");
+        JButton quitarButton = new JButton("🗑️ Quitar producto");
         quitarButton.addActionListener(e -> quitarProductoSeleccionado());
 
-        JButton limpiarButton = new JButton("Limpiar carrito");
+        JButton limpiarButton = new JButton("🔄 Refrescar carrito");
         limpiarButton.addActionListener(e -> limpiarCarrito());
 
         accionesPanel.add(quitarButton);
@@ -172,10 +172,10 @@ public class NuevaVentaFrame extends JFrame {
         JPanel botonesPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         botonesPanel.setOpaque(false);
 
-        JButton guardarButton = crearBotonPrimario("Guardar venta");
+        JButton guardarButton = crearBotonPrimario("💾 Guardar venta");
         guardarButton.addActionListener(e -> guardarVenta());
 
-        JButton cancelarButton = new JButton("Cancelar");
+        JButton cancelarButton = new JButton("❌ Cancelar");
         cancelarButton.addActionListener(e -> dispose());
 
         botonesPanel.add(guardarButton);
@@ -352,3 +352,4 @@ public class NuevaVentaFrame extends JFrame {
         JOptionPane.showMessageDialog(this, mensaje, "Error", JOptionPane.ERROR_MESSAGE);
     }
 }
+

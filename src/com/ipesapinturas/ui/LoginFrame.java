@@ -62,14 +62,14 @@ public class LoginFrame extends JFrame {
         buttonPanel.setBackground(new Color(45, 45, 48));
         buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 0));
 
-        loginButton = new JButton("Ingresar");
+        loginButton = new JButton("👤 Ingresar");
         loginButton.setBackground(new Color(220, 53, 69));
         loginButton.setForeground(Color.WHITE);
         loginButton.setFont(new Font("Arial", Font.BOLD, 12));
         loginButton.setPreferredSize(new Dimension(100, 35));
         loginButton.addActionListener(this::autenticar);
 
-        salirButton = new JButton("Salir");
+        salirButton = new JButton("🚪 Salir");
         salirButton.setBackground(new Color(108, 117, 125));
         salirButton.setForeground(Color.WHITE);
         salirButton.setFont(new Font("Arial", Font.BOLD, 12));
@@ -137,3 +137,4 @@ public class LoginFrame extends JFrame {
         });
     }
 }
+

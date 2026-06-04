@@ -2,6 +2,7 @@ package com.ipesapinturas.ui.panels;
 
 import com.ipesapinturas.dao.ProductoDAO;
 import com.ipesapinturas.models.Producto;
+import com.ipesapinturas.ui.MainFrame;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -24,9 +25,10 @@ import java.util.List;
 
 public class ProductoDemoPanel extends JPanel {
     private static final String MENSAJE_NO_EXISTE = "No existe una pintura con ese ID.";
-    private static final String MENSAJE_REGISTROS_ASOCIADOS =
-            "No se puede eliminar porque la pintura tiene registros asociados.";
     private static final String MENSAJE_ELIMINADA = "Pintura eliminada correctamente.";
+    private static final String TITULO_BUSQUEDA = "Búsqueda de Producto";
+    private static final String TITULO_ELIMINACION = "Eliminación de Producto";
+    private static final String TITULO_ERROR = "Error";
 
     private final ProductoDAO productoDAO;
     private final JTextField buscarIdField;
@@ -57,7 +59,7 @@ public class ProductoDemoPanel extends JPanel {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         panel.setOpaque(false);
 
-        JLabel tituloLabel = new JLabel("Demostracion CRUD de Pinturas");
+        JLabel tituloLabel = new JLabel("🔍 Demostración CRUD de Pinturas");
         tituloLabel.setFont(new Font("Arial", Font.BOLD, 24));
 
         JPanel controlesPanel = new JPanel(new GridLayout(2, 1, 8, 8));
@@ -75,6 +77,7 @@ public class ProductoDemoPanel extends JPanel {
         panel.setOpaque(false);
 
         JButton buscarButton = new JButton("Buscar producto por ID");
+        buscarButton.setIcon(MainFrame.ICONO_SEARCH);
         buscarButton.addActionListener(e -> buscarProductoPorId());
         buscarIdField.addActionListener(e -> buscarProductoPorId());
 
@@ -89,12 +92,13 @@ public class ProductoDemoPanel extends JPanel {
         panel.setOpaque(false);
 
         JButton eliminarButton = new JButton("Eliminar pintura");
+        eliminarButton.setIcon(MainFrame.ICONO_BIN);
         eliminarButton.setBackground(new Color(220, 53, 69));
         eliminarButton.setForeground(Color.WHITE);
         eliminarButton.addActionListener(e -> eliminarPinturaPorId());
         eliminarIdField.addActionListener(e -> eliminarPinturaPorId());
 
-        JButton refrescarButton = new JButton("Refrescar tabla");
+        JButton refrescarButton = new JButton("🔄 Refrescar tabla");
         refrescarButton.addActionListener(e -> refrescarTabla());
 
         panel.add(new JLabel("ID a eliminar:"));
@@ -143,54 +147,105 @@ public class ProductoDemoPanel extends JPanel {
     }
 
     private void buscarProductoPorId() {
-        Integer id = leerId(buscarIdField, "Ingrese un ID valido para buscar.");
-        if (id == null) {
+        String idTexto = buscarIdField.getText().trim();
+
+        if (idTexto.isEmpty()) {
+            mostrarAdvertencia("Ingrese un ID para buscar.");
+            buscarIdField.requestFocus();
+            return;
+        }
+
+        Integer id;
+        try {
+            id = Integer.parseInt(idTexto);
+            if (id <= 0) {
+                throw new NumberFormatException();
+            }
+        } catch (NumberFormatException ex) {
+            mostrarError("El ID debe ser numérico.");
+            buscarIdField.selectAll();
+            buscarIdField.requestFocus();
             return;
         }
 
         Producto producto = productoDAO.buscarPorId(id);
         if (producto == null) {
-            mostrarSalida(MENSAJE_NO_EXISTE);
+            mostrarBusqueda(MENSAJE_NO_EXISTE);
+            buscarIdField.selectAll();
             return;
         }
 
-        mostrarSalida(formatearProducto(producto));
+        mostrarExito("Producto encontrado correctamente.\n\n" + formatearProducto(producto));
         seleccionarProductoEnTabla(id);
     }
 
     private void eliminarPinturaPorId() {
-        Integer id = leerId(eliminarIdField, "Ingrese un ID valido para eliminar.");
-        if (id == null) {
+        String idTexto = eliminarIdField.getText().trim();
+
+        if (idTexto.isEmpty()) {
+            mostrarAdvertencia("Ingrese un ID para eliminar.");
+            eliminarIdField.requestFocus();
+            return;
+        }
+
+        Integer id;
+        try {
+            id = Integer.parseInt(idTexto);
+            if (id <= 0) {
+                throw new NumberFormatException();
+            }
+        } catch (NumberFormatException ex) {
+            mostrarError("El ID debe ser numérico.");
+            eliminarIdField.selectAll();
+            eliminarIdField.requestFocus();
+            return;
+        }
+
+        Producto producto = productoDAO.buscarPorId(id);
+        if (producto == null) {
+            mostrarBusqueda(MENSAJE_NO_EXISTE);
+            eliminarIdField.selectAll();
+            return;
+        }
+
+        int opcion = confirmar("¿Seguro que deseas eliminar esta pintura?\n\n" + formatearProducto(producto));
+        if (opcion != JOptionPane.YES_OPTION) {
             return;
         }
 
         try {
             productoDAO.eliminar(id);
-            mostrarSalida(MENSAJE_ELIMINADA);
+            mostrarExito(MENSAJE_ELIMINADA);
+            eliminarIdField.setText("");
             refrescarTabla();
         } catch (SQLException ex) {
-            if (MENSAJE_REGISTROS_ASOCIADOS.equals(ex.getMessage())) {
-                mostrarSalida(MENSAJE_REGISTROS_ASOCIADOS);
-            } else {
-                mostrarSalida("Error al eliminar pintura: " + ex.getMessage());
-            }
+            mostrarError("Error al eliminar pintura:\n" + ex.getMessage());
         }
     }
 
-    private Integer leerId(JTextField field, String mensajeError) {
-        String texto = field.getText().trim();
-        try {
-            int id = Integer.parseInt(texto);
-            if (id <= 0) {
-                throw new NumberFormatException("El ID debe ser mayor a cero.");
-            }
-            return id;
-        } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, mensajeError, "ID invalido", JOptionPane.WARNING_MESSAGE);
-            field.selectAll();
-            field.requestFocus();
-            return null;
-        }
+    private void mostrarExito(String mensaje) {
+        JOptionPane.showMessageDialog(this, mensaje, TITULO_BUSQUEDA,
+                JOptionPane.PLAIN_MESSAGE, MainFrame.ICONO_CHECK);
+    }
+
+    private void mostrarBusqueda(String mensaje) {
+        JOptionPane.showMessageDialog(this, mensaje, TITULO_BUSQUEDA,
+                JOptionPane.PLAIN_MESSAGE, MainFrame.ICONO_SEARCH);
+    }
+
+    private void mostrarError(String mensaje) {
+        JOptionPane.showMessageDialog(this, mensaje, TITULO_ERROR,
+                JOptionPane.PLAIN_MESSAGE, MainFrame.ICONO_CRISIS);
+    }
+
+    private void mostrarAdvertencia(String mensaje) {
+        JOptionPane.showMessageDialog(this, mensaje, "Advertencia",
+                JOptionPane.PLAIN_MESSAGE, MainFrame.ICONO_SEARCH);
+    }
+
+    private int confirmar(String mensaje) {
+        return JOptionPane.showConfirmDialog(this, mensaje, TITULO_ELIMINACION,
+                JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, MainFrame.ICONO_WARNING);
     }
 
     private void refrescarTabla() {
@@ -210,6 +265,8 @@ public class ProductoDemoPanel extends JPanel {
                     producto.getPresentacion()
             });
         }
+
+        mostrarExito("Tabla actualizada correctamente.\n(" + productos.size() + " registros)");
     }
 
     private void seleccionarProductoEnTabla(int idPintura) {
@@ -236,7 +293,5 @@ public class ProductoDemoPanel extends JPanel {
                 + "presentacion: " + producto.getPresentacion();
     }
 
-    private void mostrarSalida(String mensaje) {
-        salidaArea.setText(mensaje);
-    }
 }
+

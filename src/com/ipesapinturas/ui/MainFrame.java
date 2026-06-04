@@ -7,10 +7,47 @@ import javax.swing.*;
 import java.awt.*;
 
 public class MainFrame extends JFrame {
+    private static final ImageIcon iconoPlus = new ImageIcon("src/com/ipesapinturas/ui/icons/plus.png");
+    private static final ImageIcon iconoEdit = new ImageIcon("src/com/ipesapinturas/ui/icons/edit.png");
+    private static final ImageIcon iconoBin = new ImageIcon("src/com/ipesapinturas/ui/icons/bin.png");
+    private static final ImageIcon iconoSearch = new ImageIcon("src/com/ipesapinturas/ui/icons/search.png");
+    private static final ImageIcon iconoCheck = new ImageIcon("src/com/ipesapinturas/ui/icons/check.png");
+    private static final ImageIcon iconoCrisis = new ImageIcon("src/com/ipesapinturas/ui/icons/crisis.png");
+    private static final ImageIcon iconoClose      = new ImageIcon("src/com/ipesapinturas/ui/icons/close.png");
+    private static final ImageIcon iconoHome       = new ImageIcon("src/com/ipesapinturas/ui/icons/home-button.png");
+    private static final ImageIcon iconoBox        = new ImageIcon("src/com/ipesapinturas/ui/icons/box.png");
+    private static final ImageIcon iconoHuman      = new ImageIcon("src/com/ipesapinturas/ui/icons/human.png");
+    private static final ImageIcon iconoTruck      = new ImageIcon("src/com/ipesapinturas/ui/icons/truck.png");
+    private static final ImageIcon iconoCart       = new ImageIcon("src/com/ipesapinturas/ui/icons/cart.png");
+    private static final ImageIcon iconoStatistics = new ImageIcon("src/com/ipesapinturas/ui/icons/statistics.png");
+    private static final ImageIcon iconoWarning    = new ImageIcon("src/com/ipesapinturas/ui/icons/warning.png");
+
+    public static final ImageIcon ICONO_PLUS = iconoPlus;
+    public static final ImageIcon ICONO_EDIT = iconoEdit;
+    public static final ImageIcon ICONO_BIN = iconoBin;
+    public static final ImageIcon ICONO_SEARCH = iconoSearch;
+    public static final ImageIcon ICONO_CHECK = iconoCheck;
+    public static final ImageIcon ICONO_CRISIS = iconoCrisis;
+    public static final ImageIcon ICONO_CLOSE      = iconoClose;
+    public static final ImageIcon ICONO_HOME       = iconoHome;
+    public static final ImageIcon ICONO_BOX        = iconoBox;
+    public static final ImageIcon ICONO_HUMAN      = iconoHuman;
+    public static final ImageIcon ICONO_TRUCK      = iconoTruck;
+    public static final ImageIcon ICONO_CART       = iconoCart;
+    public static final ImageIcon ICONO_STATISTICS = iconoStatistics;
+    public static final ImageIcon ICONO_WARNING    = iconoWarning;
+
     private Usuario usuarioActual;
     private JPanel contentPanel;
     private CardLayout cardLayout;
     private JLabel usuarioLabel;
+
+    private JButton btnMenuHome;
+    private JButton btnMenuProductos;
+    private JButton btnMenuClientes;
+    private JButton btnMenuProveedores;
+    private JButton btnMenuVentas;
+    private JButton btnMenuReportes;
 
     public MainFrame(Usuario usuario) {
         this.usuarioActual = usuario;
@@ -49,6 +86,7 @@ public class MainFrame extends JFrame {
         mainPanel.add(contentPanel, BorderLayout.CENTER);
 
         add(mainPanel);
+        initComponentIcons();
     }
 
     private JPanel createHeaderPanel() {
@@ -68,7 +106,7 @@ public class MainFrame extends JFrame {
         usuarioLabel.setForeground(Color.WHITE);
         usuarioLabel.setFont(new Font("Arial", Font.PLAIN, 12));
 
-        JButton salirButton = new JButton("Salir");
+        JButton salirButton = new JButton("🚪 Salir");
         salirButton.setBackground(new Color(180, 40, 55));
         salirButton.setForeground(Color.WHITE);
         salirButton.setFocusPainted(false);
@@ -100,20 +138,20 @@ public class MainFrame extends JFrame {
         menuPanel.add(Box.createVerticalStrut(20));
 
         // Botones del menú
-        agregarBotonMenu(menuPanel, "📊 Dashboard", "dashboard");
-        agregarBotonMenu(menuPanel, "🎨 Productos", "productos");
-        agregarBotonMenu(menuPanel, "Demo Productos", "demoProductos");
-        agregarBotonMenu(menuPanel, "👥 Clientes", "clientes");
-        agregarBotonMenu(menuPanel, "🏭 Proveedores", "proveedores");
-        agregarBotonMenu(menuPanel, "💳 Ventas", "ventas");
-        agregarBotonMenu(menuPanel, "📈 Reportes", "reportes");
+        btnMenuHome        = agregarBotonMenu(menuPanel, "Dashboard",      "dashboard");
+        btnMenuProductos   = agregarBotonMenu(menuPanel, "Productos",       "productos");
+                             agregarBotonMenu(menuPanel, "Demo Productos",  "demoProductos");
+        btnMenuClientes    = agregarBotonMenu(menuPanel, "Clientes",        "clientes");
+        btnMenuProveedores = agregarBotonMenu(menuPanel, "Proveedores",     "proveedores");
+        btnMenuVentas      = agregarBotonMenu(menuPanel, "Ventas",          "ventas");
+        btnMenuReportes    = agregarBotonMenu(menuPanel, "Reportes",        "reportes");
 
         menuPanel.add(Box.createVerticalGlue());
 
         return menuPanel;
     }
 
-    private void agregarBotonMenu(JPanel menuPanel, String texto, String panelName) {
+    private JButton agregarBotonMenu(JPanel menuPanel, String texto, String panelName) {
         JButton button = new JButton(texto);
         button.setAlignmentX(Component.CENTER_ALIGNMENT);
         button.setMaximumSize(new Dimension(180, 45));
@@ -139,13 +177,25 @@ public class MainFrame extends JFrame {
 
         menuPanel.add(button);
         menuPanel.add(Box.createVerticalStrut(5));
+        return button;
+    }
+
+    private void initComponentIcons() {
+        btnMenuHome.setIcon(iconoHome);
+        btnMenuProductos.setIcon(iconoBox);
+        btnMenuClientes.setIcon(iconoHuman);
+        btnMenuProveedores.setIcon(iconoTruck);
+        btnMenuVentas.setIcon(iconoCart);
+        btnMenuReportes.setIcon(iconoStatistics);
     }
 
     private void cerrarSesion() {
         int opcion = JOptionPane.showConfirmDialog(this,
                 "¿Está seguro de que desea cerrar sesión?",
                 "Cerrar Sesión",
-                JOptionPane.YES_NO_OPTION);
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.PLAIN_MESSAGE,
+                ICONO_WARNING);
 
         if (opcion == JOptionPane.YES_OPTION) {
             LoginFrame loginFrame = new LoginFrame();
@@ -154,3 +204,4 @@ public class MainFrame extends JFrame {
         }
     }
 }
+

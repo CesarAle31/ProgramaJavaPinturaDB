@@ -36,13 +36,13 @@ public class VentasPanel extends JPanel {
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setOpaque(false);
 
-        JLabel titleLabel = new JLabel("Historial de Ventas");
+        JLabel titleLabel = new JLabel("🛒 Historial de Ventas");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
 
         JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         actionPanel.setOpaque(false);
 
-        JButton nuevaVentaButton = new JButton("+ Nueva Venta");
+        JButton nuevaVentaButton = new JButton("➕ Nueva Venta");
         nuevaVentaButton.setBackground(new Color(220, 53, 69));
         nuevaVentaButton.setForeground(Color.WHITE);
         nuevaVentaButton.addActionListener(e -> abrirNuevaVenta());
@@ -110,3 +110,4 @@ public class VentasPanel extends JPanel {
         nuevaVentaFrame.setVisible(true);
     }
 }
+

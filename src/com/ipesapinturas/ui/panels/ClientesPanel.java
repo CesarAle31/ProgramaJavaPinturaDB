@@ -36,7 +36,7 @@ public class ClientesPanel extends JPanel {
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setOpaque(false);
 
-        JLabel titleLabel = new JLabel("Gestión de Clientes");
+        JLabel titleLabel = new JLabel("👤 Gestión de Clientes");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
 
         JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
@@ -49,13 +49,13 @@ public class ClientesPanel extends JPanel {
         JButton buscarIdButton = new JButton("Buscar ID");
         buscarIdButton.addActionListener(e -> buscarPorId());
 
-        JButton limpiarButton = new JButton("Limpiar");
+        JButton limpiarButton = new JButton("🔄 Refrescar");
         limpiarButton.addActionListener(e -> {
             idSearchField.setText("");
             actualizarTabla();
         });
 
-        JButton nuevoButton = new JButton("+ Nuevo Cliente");
+        JButton nuevoButton = new JButton("➕ Nuevo Cliente");
         nuevoButton.setBackground(new Color(220, 53, 69));
         nuevoButton.setForeground(Color.WHITE);
         nuevoButton.addActionListener(e -> abrirDialogoNuevo());
@@ -63,7 +63,7 @@ public class ClientesPanel extends JPanel {
         JButton editarButton = new JButton("✏️ Editar");
         editarButton.addActionListener(e -> abrirDialogoEditar());
 
-        JButton eliminarButton = new JButton("🗑️ Eliminar");
+        JButton eliminarButton = new JButton("Eliminar");
         eliminarButton.setBackground(new Color(220, 53, 69));
         eliminarButton.setForeground(Color.WHITE);
         eliminarButton.addActionListener(e -> eliminar());
@@ -216,8 +216,8 @@ public class ClientesPanel extends JPanel {
         panel.add(estadoCombo);
 
         JPanel buttonPanel = new JPanel();
-        JButton guardarButton = new JButton("Guardar");
-        JButton cancelarButton = new JButton("Cancelar");
+        JButton guardarButton = new JButton("💾 Guardar");
+        JButton cancelarButton = new JButton("❌ Cancelar");
 
         guardarButton.addActionListener(e -> {
             Cliente cliente = new Cliente();
@@ -279,8 +279,8 @@ public class ClientesPanel extends JPanel {
         panel.add(estadoCombo);
 
         JPanel buttonPanel = new JPanel();
-        JButton actualizarButton = new JButton("Actualizar");
-        JButton cancelarButton = new JButton("Cancelar");
+        JButton actualizarButton = new JButton("💾 Actualizar");
+        JButton cancelarButton = new JButton("❌ Cancelar");
 
         actualizarButton.addActionListener(e -> {
             if (nombreField.getText().trim().isEmpty()) {
@@ -343,3 +343,4 @@ public class ClientesPanel extends JPanel {
         }
     }
 }
+

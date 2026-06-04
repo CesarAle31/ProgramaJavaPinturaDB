@@ -4,10 +4,12 @@ import com.ipesapinturas.dao.ProductoDAO;
 import com.ipesapinturas.dao.ProveedorDAO;
 import com.ipesapinturas.models.Producto;
 import com.ipesapinturas.models.Proveedor;
+import com.ipesapinturas.ui.MainFrame;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -43,7 +45,7 @@ public class ProductosPanel extends JPanel {
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setOpaque(false);
 
-        JLabel titleLabel = new JLabel("Gestión de Productos");
+        JLabel titleLabel = new JLabel("➕ Gestión de Productos");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
 
         // Panel de búsqueda y botones
@@ -63,44 +65,54 @@ public class ProductosPanel extends JPanel {
         idSearchField = new JTextField(8);
         idSearchField.addActionListener(e -> buscarPorId());
 
-        JButton buscarIdButton = new JButton("Buscar ID");
-        buscarIdButton.addActionListener(e -> buscarPorId());
+        JButton btnBuscar = new JButton("Buscar ID");
+        btnBuscar.addActionListener(e -> buscarPorId());
 
-        JButton limpiarButton = new JButton("Limpiar");
+        JButton limpiarButton = new JButton("🔄 Refrescar");
         limpiarButton.addActionListener(e -> {
             searchField.setText("");
             idSearchField.setText("");
             actualizarTabla();
         });
 
-        JButton nuevoButton = new JButton("+ Nuevo Producto");
-        nuevoButton.setBackground(new Color(220, 53, 69));
-        nuevoButton.setForeground(Color.WHITE);
-        nuevoButton.addActionListener(e -> abrirDialogoNuevo());
+        JButton btnNuevo = new JButton("➕ Nuevo Producto");
+        btnNuevo.setBackground(new Color(220, 53, 69));
+        btnNuevo.setForeground(Color.WHITE);
+        btnNuevo.addActionListener(e -> abrirDialogoNuevo());
 
-        JButton editarButton = new JButton("✏️ Editar");
-        editarButton.addActionListener(e -> abrirDialogoEditar());
+        JButton btnEditar = new JButton("Editar");
+        btnEditar.addActionListener(e -> abrirDialogoEditar());
 
-        JButton eliminarButton = new JButton("🗑️ Eliminar");
-        eliminarButton.setBackground(new Color(220, 53, 69));
-        eliminarButton.setForeground(Color.WHITE);
-        eliminarButton.addActionListener(e -> eliminar());
+        JButton btnEliminar = new JButton("Eliminar");
+        btnEliminar.setBackground(new Color(220, 53, 69));
+        btnEliminar.setForeground(Color.WHITE);
+        btnEliminar.addActionListener(e -> eliminar());
+
+        initCustomComponents(btnNuevo, btnEditar, btnEliminar, btnBuscar);
 
         actionPanel.add(searchLabel);
         actionPanel.add(searchField);
         actionPanel.add(idSearchLabel);
         actionPanel.add(idSearchField);
-        actionPanel.add(buscarIdButton);
+        actionPanel.add(btnBuscar);
         actionPanel.add(limpiarButton);
         actionPanel.add(Box.createHorizontalStrut(20));
-        actionPanel.add(nuevoButton);
-        actionPanel.add(editarButton);
-        actionPanel.add(eliminarButton);
+        actionPanel.add(btnNuevo);
+        actionPanel.add(btnEditar);
+        actionPanel.add(btnEliminar);
 
         topPanel.add(titleLabel, BorderLayout.NORTH);
         topPanel.add(actionPanel, BorderLayout.SOUTH);
 
         return topPanel;
+    }
+
+    private void initCustomComponents(JButton btnNuevo, JButton btnEditar,
+                                      JButton btnEliminar, JButton btnBuscar) {
+        btnNuevo.setIcon(MainFrame.ICONO_PLUS);
+        btnEditar.setIcon(MainFrame.ICONO_EDIT);
+        btnEliminar.setIcon(MainFrame.ICONO_BIN);
+        btnBuscar.setIcon(MainFrame.ICONO_SEARCH);
     }
 
     private JPanel createTablePanel() {
@@ -169,12 +181,10 @@ public class ProductosPanel extends JPanel {
             if (producto != null) {
                 agregarProductoATabla(producto);
             } else {
-                JOptionPane.showMessageDialog(this, "No se encontro ningun producto con ese ID",
-                        "Sin resultados", JOptionPane.INFORMATION_MESSAGE);
+                mostrarBusqueda(this, "No existe una pintura con ese ID.", "Sin resultados");
             }
         } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "Ingrese un ID numerico",
-                    "ID invalido", JOptionPane.WARNING_MESSAGE);
+            mostrarCrisis(this, "Ingrese un ID numerico", "ID invalido");
             idSearchField.selectAll();
             idSearchField.requestFocus();
         }
@@ -196,8 +206,7 @@ public class ProductosPanel extends JPanel {
     private Producto buscarProductoPorIdParaAccion(String accion) {
         String idTexto = idSearchField.getText().trim();
         if (idTexto.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Ingrese el ID del producto para " + accion,
-                    "ID requerido", JOptionPane.INFORMATION_MESSAGE);
+            mostrarBusqueda(this, "Ingrese el ID del producto para " + accion, "ID requerido");
             idSearchField.requestFocus();
             return null;
         }
@@ -209,8 +218,7 @@ public class ProductosPanel extends JPanel {
             tableModel.setRowCount(0);
 
             if (producto == null) {
-                JOptionPane.showMessageDialog(this, "No se encontro ningun producto con ese ID",
-                        "Sin resultados", JOptionPane.INFORMATION_MESSAGE);
+                mostrarBusqueda(this, "No existe una pintura con ese ID.", "Sin resultados");
                 idSearchField.selectAll();
                 idSearchField.requestFocus();
                 return null;
@@ -220,8 +228,7 @@ public class ProductosPanel extends JPanel {
             productosTable.setRowSelectionInterval(0, 0);
             return producto;
         } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "Ingrese un ID numerico",
-                    "ID invalido", JOptionPane.WARNING_MESSAGE);
+            mostrarCrisis(this, "Ingrese un ID numerico", "ID invalido");
             idSearchField.selectAll();
             idSearchField.requestFocus();
             return null;
@@ -270,31 +277,69 @@ public class ProductosPanel extends JPanel {
         panel.add(proveedorCombo);
 
         JPanel buttonPanel = new JPanel();
-        JButton guardarButton = new JButton("Guardar");
-        JButton cancelarButton = new JButton("Cancelar");
+        JButton guardarButton = new JButton("💾 Guardar");
+        JButton cancelarButton = new JButton("❌ Cancelar");
 
         guardarButton.addActionListener(e -> {
             try {
+                validarCamposObligatorios(
+                        nombreField.getText(),
+                        colorField.getText(),
+                        lineaField.getText(),
+                        capacidadField.getText(),
+                        presentacionField.getText(),
+                        costoField.getText(),
+                        precioField.getText(),
+                        stockField.getText()
+                );
+
+                int claveClasificacion = parseEntero(lineaField.getText(), "La línea debe ser numérica");
+                int capacidad = parseEntero(capacidadField.getText(), "La capacidad debe ser numérica");
+                if (capacidad <= 0) {
+                    throw new NumberFormatException("La capacidad debe ser mayor a 0");
+                }
+
+                BigDecimal costo = parseDecimal(costoField.getText(), "El costo debe ser numérico");
+                if (costo.compareTo(BigDecimal.ZERO) <= 0) {
+                    throw new NumberFormatException("El costo debe ser mayor a 0");
+                }
+
+                BigDecimal precioVenta = parseDecimal(precioField.getText(), "El precio de venta debe ser numérico");
+                if (precioVenta.compareTo(BigDecimal.ZERO) <= 0) {
+                    throw new NumberFormatException("El precio de venta debe ser mayor a 0");
+                }
+
+                int stock = parseEntero(stockField.getText(), "El stock debe ser numérico");
+                if (stock < 0) {
+                    throw new NumberFormatException("El stock no puede ser negativo");
+                }
+
+                Proveedor proveedorSeleccionado = (Proveedor) proveedorCombo.getSelectedItem();
+                if (proveedorSeleccionado == null || proveedorSeleccionado.getId() <= 0) {
+                    throw new IllegalArgumentException("Seleccione un proveedor válido");
+                }
+
                 Producto producto = new Producto();
-                producto.setNombre(nombreField.getText());
-                producto.setColor(colorField.getText());
-                producto.setLinea(lineaField.getText());
-                producto.setCapacidad(capacidadField.getText().trim());
-                producto.setPresentacion(presentacionField.getText());
-                producto.setCosto(Double.parseDouble(costoField.getText()));
-                producto.setPrecioVenta(Double.parseDouble(precioField.getText()));
-                producto.setStock(Integer.parseInt(stockField.getText()));
-                producto.setProveedorId(((Proveedor) proveedorCombo.getSelectedItem()).getId());
+                producto.setNombre(nombreField.getText().trim());
+                producto.setColor(colorField.getText().trim());
+                producto.setClaveClasificacion(claveClasificacion);
+                producto.setCapacidad(capacidad);
+                producto.setPresentacion(presentacionField.getText().trim());
+                producto.setCosto(costo);
+                producto.setPrecioVenta(precioVenta.doubleValue());
+                producto.setStock(stock);
+                producto.setProveedorId(proveedorSeleccionado.getId());
 
                 productoDAO.agregar(producto);
-                JOptionPane.showMessageDialog(dialog, "Producto guardado correctamente");
+                mostrarExito(dialog, "Producto guardado correctamente", "Exito");
                 refrescarTablaProductos();
                 dialog.dispose();
             } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(dialog, "Error en los datos ingresados", "Error", JOptionPane.ERROR_MESSAGE);
+                mostrarCrisis(dialog, ex.getMessage(), "Error");
+            } catch (IllegalArgumentException ex) {
+                mostrarCrisis(dialog, ex.getMessage(), "Error");
             } catch (SQLException ex) {
-                JOptionPane.showMessageDialog(this, ex.getMessage(),
-                        "Error de Base de Datos", JOptionPane.ERROR_MESSAGE);
+                mostrarCrisis(dialog, ex.getMessage(), "Error de Base de Datos");
             }
         });
 
@@ -359,13 +404,13 @@ public class ProductosPanel extends JPanel {
         panel.add(proveedorCombo);
 
         JPanel buttonPanel = new JPanel();
-        JButton guardarButton = new JButton("Actualizar");
-        JButton cancelarButton = new JButton("Cancelar");
+        JButton guardarButton = new JButton("💾 Actualizar");
+        JButton cancelarButton = new JButton("❌ Cancelar");
 
         guardarButton.addActionListener(e -> {
             try {
                 if (nombreField.getText().trim().isEmpty()) {
-                    JOptionPane.showMessageDialog(dialog, "El nombre del producto es obligatorio", "Error", JOptionPane.ERROR_MESSAGE);
+                    mostrarCrisis(dialog, "El nombre del producto es obligatorio", "Error");
                     nombreField.requestFocus();
                     return;
                 }
@@ -383,17 +428,16 @@ public class ProductosPanel extends JPanel {
                 productoActualizado.setProveedorId(obtenerProveedorIdSeleccionado(proveedorCombo));
 
                 productoDAO.actualizar(productoActualizado);
-                JOptionPane.showMessageDialog(dialog, "Producto actualizado correctamente");
+                mostrarExito(dialog, "Producto actualizado correctamente", "Exito");
                 idSearchField.setText(String.valueOf(producto.getId()));
                 buscarPorId();
                 dialog.dispose();
             } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(dialog,
+                mostrarCrisis(dialog,
                         "Costo, precio y stock deben ser valores numericos validos",
-                        "Error", JOptionPane.ERROR_MESSAGE);
+                        "Error");
             } catch (SQLException ex) {
-                JOptionPane.showMessageDialog(this, ex.getMessage(),
-                        "Error de Base de Datos", JOptionPane.ERROR_MESSAGE);
+                mostrarCrisis(this, ex.getMessage(), "Error de Base de Datos");
             }
         });
 
@@ -425,6 +469,50 @@ public class ProductosPanel extends JPanel {
         return proveedor != null ? proveedor.getId() : 0;
     }
 
+    private void validarCamposObligatorios(String... valores) {
+        for (String valor : valores) {
+            if (valor == null || valor.trim().isEmpty()) {
+                throw new IllegalArgumentException("Todos los campos son obligatorios");
+            }
+        }
+    }
+
+    private int parseEntero(String valor, String mensajeError) {
+        try {
+            return Integer.parseInt(valor.trim());
+        } catch (NumberFormatException ex) {
+            throw new NumberFormatException(mensajeError);
+        }
+    }
+
+    private BigDecimal parseDecimal(String valor, String mensajeError) {
+        try {
+            return new BigDecimal(valor.trim());
+        } catch (NumberFormatException ex) {
+            throw new NumberFormatException(mensajeError);
+        }
+    }
+
+    private void mostrarExito(Component parent, String mensaje, String titulo) {
+        JOptionPane.showMessageDialog(parent, mensaje, titulo,
+                JOptionPane.PLAIN_MESSAGE, MainFrame.ICONO_CHECK);
+    }
+
+    private void mostrarCrisis(Component parent, String mensaje, String titulo) {
+        JOptionPane.showMessageDialog(parent, mensaje, titulo,
+                JOptionPane.PLAIN_MESSAGE, MainFrame.ICONO_CRISIS);
+    }
+
+    private void mostrarBusqueda(Component parent, String mensaje, String titulo) {
+        JOptionPane.showMessageDialog(parent, mensaje, titulo,
+                JOptionPane.PLAIN_MESSAGE, MainFrame.ICONO_SEARCH);
+    }
+
+    private int confirmarConIcono(Component parent, String mensaje, String titulo) {
+        return JOptionPane.showConfirmDialog(parent, mensaje, titulo,
+                JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, MainFrame.ICONO_WARNING);
+    }
+
     private void eliminar() {
         Producto producto = buscarProductoPorIdParaAccion("eliminar");
         if (producto == null) {
@@ -433,17 +521,16 @@ public class ProductosPanel extends JPanel {
 
         String mensaje = "Esta seguro de eliminar el producto ID " + producto.getId()
                 + " - " + producto.getNombre() + "?";
-        int opcion = JOptionPane.showConfirmDialog(this, mensaje, "Confirmar", JOptionPane.YES_NO_OPTION);
+        int opcion = confirmarConIcono(this, mensaje, "Confirmar");
 
         if (opcion == JOptionPane.YES_OPTION) {
             try {
                 productoDAO.eliminar(producto.getId());
-                JOptionPane.showMessageDialog(this, "Pintura eliminada correctamente");
+                mostrarExito(this, "Pintura eliminada correctamente", "Exito");
                 idSearchField.setText("");
                 refrescarTablaProductos();
             } catch (SQLException ex) {
-                JOptionPane.showMessageDialog(this, ex.getMessage(),
-                        "Error de Base de Datos", JOptionPane.ERROR_MESSAGE);
+                mostrarCrisis(this, ex.getMessage(), "Error de Base de Datos");
             }
         }
     }
@@ -452,3 +539,4 @@ public class ProductosPanel extends JPanel {
         actualizarTabla();
     }
 }
+

@@ -8,7 +8,7 @@ public class Producto {
     private int idProveedor;
     private String nombre;
     private String color;
-    private String capacidad;
+    private int capacidad;
     private int stock;
     private BigDecimal costo;
     private String presentacion;
@@ -19,7 +19,7 @@ public class Producto {
     }
 
     public Producto(int idPintura, int claveClasificacion, int idProveedor, String nombre,
-                    String color, String capacidad, int stock, BigDecimal costo,
+                    String color, int capacidad, int stock, BigDecimal costo,
                     String presentacion) {
         this.idPintura = idPintura;
         this.claveClasificacion = claveClasificacion;
@@ -33,7 +33,7 @@ public class Producto {
     }
 
     public Producto(int idPintura, int claveClasificacion, int idProveedor, String nombre,
-                    String color, String capacidad, int stock, double costo,
+                    String color, int capacidad, int stock, double costo,
                     String presentacion) {
         this(idPintura, claveClasificacion, idProveedor, nombre, color, capacidad, stock,
                 BigDecimal.valueOf(costo), presentacion);
@@ -79,16 +79,24 @@ public class Producto {
         this.color = color;
     }
 
-    public String getCapacidad() {
+    public int getCapacidad() {
         return capacidad;
     }
 
-    public void setCapacidad(String capacidad) {
+    public void setCapacidad(int capacidad) {
         this.capacidad = capacidad;
     }
 
-    public void setCapacidad(int capacidad) {
-        this.capacidad = String.valueOf(capacidad);
+    public void setCapacidad(String capacidad) {
+        if (capacidad == null || capacidad.trim().isEmpty()) {
+            this.capacidad = 1;
+            return;
+        }
+        try {
+            this.capacidad = Integer.parseInt(capacidad.trim());
+        } catch (NumberFormatException e) {
+            this.capacidad = 1;
+        }
     }
 
     public int getStock() {
