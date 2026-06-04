@@ -9,6 +9,7 @@
 #Si en el futuro quieres volver a subir cambios de ese archivo: Solo debes revertir el comando ejecutando:
 #git update-index --no-assume-unchanged src/com/ipesapinturas/utils/DatabaseConnection.java
 # Archivos compilados
+#git update-index --assume-unchanged run.bat
 bin/
 out/
 target/

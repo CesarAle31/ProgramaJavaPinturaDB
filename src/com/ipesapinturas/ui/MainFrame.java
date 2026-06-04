@@ -40,6 +40,7 @@ public class MainFrame extends JFrame {
         // Agregar paneles al CardLayout
         contentPanel.add(new DashboardPanel(usuarioActual), "dashboard");
         contentPanel.add(new ProductosPanel(), "productos");
+        contentPanel.add(new ProductoDemoPanel(), "demoProductos");
         contentPanel.add(new ClientesPanel(), "clientes");
         contentPanel.add(new ProveedoresPanel(), "proveedores");
         contentPanel.add(new VentasPanel(usuarioActual), "ventas");
@@ -101,6 +102,7 @@ public class MainFrame extends JFrame {
         // Botones del menú
         agregarBotonMenu(menuPanel, "📊 Dashboard", "dashboard");
         agregarBotonMenu(menuPanel, "🎨 Productos", "productos");
+        agregarBotonMenu(menuPanel, "Demo Productos", "demoProductos");
         agregarBotonMenu(menuPanel, "👥 Clientes", "clientes");
         agregarBotonMenu(menuPanel, "🏭 Proveedores", "proveedores");
         agregarBotonMenu(menuPanel, "💳 Ventas", "ventas");
