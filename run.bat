@@ -16,3 +16,4 @@ echo Ejecutando...
 "C:\Program Files\Java\jdk-26.0.1\bin\java.exe" -cp "bin;lib\*" com.ipesapinturas.ui.LoginFrame
 
 pause
+a

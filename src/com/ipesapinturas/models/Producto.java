@@ -1,48 +1,66 @@
 package com.ipesapinturas.models;
 
-import java.time.LocalDateTime;
+import java.math.BigDecimal;
 
 public class Producto {
-    private int id;
+    private int idPintura;
+    private int claveClasificacion;
+    private int idProveedor;
     private String nombre;
     private String color;
-    private String linea;
-    private int capacidad;
-    private String presentacion;
-    private double costo;
-    private double precioVenta;
+    private String capacidad;
     private int stock;
-    private int proveedorId;
+    private BigDecimal costo;
+    private String presentacion;
+
     private String proveedorNombre;
-    private LocalDateTime fechaRegistro;
 
     public Producto() {
     }
 
-    public Producto(int id, String nombre, String color, String linea, int capacidad,
-                    String presentacion, double costo, double precioVenta, int stock,
-                    int proveedorId, String proveedorNombre, LocalDateTime fechaRegistro) {
-        this.id = id;
+    public Producto(int idPintura, int claveClasificacion, int idProveedor, String nombre,
+                    String color, String capacidad, int stock, BigDecimal costo,
+                    String presentacion) {
+        this.idPintura = idPintura;
+        this.claveClasificacion = claveClasificacion;
+        this.idProveedor = idProveedor;
         this.nombre = nombre;
         this.color = color;
-        this.linea = linea;
         this.capacidad = capacidad;
-        this.presentacion = presentacion;
-        this.costo = costo;
-        this.precioVenta = precioVenta;
         this.stock = stock;
-        this.proveedorId = proveedorId;
-        this.proveedorNombre = proveedorNombre;
-        this.fechaRegistro = fechaRegistro;
+        this.costo = costo;
+        this.presentacion = presentacion;
     }
 
-    // Getters y Setters
-    public int getId() {
-        return id;
+    public Producto(int idPintura, int claveClasificacion, int idProveedor, String nombre,
+                    String color, String capacidad, int stock, double costo,
+                    String presentacion) {
+        this(idPintura, claveClasificacion, idProveedor, nombre, color, capacidad, stock,
+                BigDecimal.valueOf(costo), presentacion);
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public int getIdPintura() {
+        return idPintura;
+    }
+
+    public void setIdPintura(int idPintura) {
+        this.idPintura = idPintura;
+    }
+
+    public int getClaveClasificacion() {
+        return claveClasificacion;
+    }
+
+    public void setClaveClasificacion(int claveClasificacion) {
+        this.claveClasificacion = claveClasificacion;
+    }
+
+    public int getIdProveedor() {
+        return idProveedor;
+    }
+
+    public void setIdProveedor(int idProveedor) {
+        this.idProveedor = idProveedor;
     }
 
     public String getNombre() {
@@ -61,44 +79,16 @@ public class Producto {
         this.color = color;
     }
 
-    public String getLinea() {
-        return linea;
-    }
-
-    public void setLinea(String linea) {
-        this.linea = linea;
-    }
-
-    public int getCapacidad() {
+    public String getCapacidad() {
         return capacidad;
     }
 
-    public void setCapacidad(int capacidad) {
+    public void setCapacidad(String capacidad) {
         this.capacidad = capacidad;
     }
 
-    public String getPresentacion() {
-        return presentacion;
-    }
-
-    public void setPresentacion(String presentacion) {
-        this.presentacion = presentacion;
-    }
-
-    public double getCosto() {
-        return costo;
-    }
-
-    public void setCosto(double costo) {
-        this.costo = costo;
-    }
-
-    public double getPrecioVenta() {
-        return precioVenta;
-    }
-
-    public void setPrecioVenta(double precioVenta) {
-        this.precioVenta = precioVenta;
+    public void setCapacidad(int capacidad) {
+        this.capacidad = String.valueOf(capacidad);
     }
 
     public int getStock() {
@@ -109,12 +99,28 @@ public class Producto {
         this.stock = stock;
     }
 
-    public int getProveedorId() {
-        return proveedorId;
+    public BigDecimal getCostoDecimal() {
+        return costo;
     }
 
-    public void setProveedorId(int proveedorId) {
-        this.proveedorId = proveedorId;
+    public void setCosto(BigDecimal costo) {
+        this.costo = costo;
+    }
+
+    public double getCosto() {
+        return costo != null ? costo.doubleValue() : 0.0;
+    }
+
+    public void setCosto(double costo) {
+        this.costo = BigDecimal.valueOf(costo);
+    }
+
+    public String getPresentacion() {
+        return presentacion;
+    }
+
+    public void setPresentacion(String presentacion) {
+        this.presentacion = presentacion;
     }
 
     public String getProveedorNombre() {
@@ -125,16 +131,49 @@ public class Producto {
         this.proveedorNombre = proveedorNombre;
     }
 
-    public LocalDateTime getFechaRegistro() {
-        return fechaRegistro;
+    public int getId() {
+        return idPintura;
     }
 
-    public void setFechaRegistro(LocalDateTime fechaRegistro) {
-        this.fechaRegistro = fechaRegistro;
+    public void setId(int id) {
+        this.idPintura = id;
+    }
+
+    public String getLinea() {
+        return String.valueOf(claveClasificacion);
+    }
+
+    public void setLinea(String linea) {
+        if (linea == null || linea.trim().isEmpty()) {
+            this.claveClasificacion = 0;
+            return;
+        }
+
+        try {
+            this.claveClasificacion = Integer.parseInt(linea.trim());
+        } catch (NumberFormatException ex) {
+            this.claveClasificacion = 0;
+        }
+    }
+
+    public int getProveedorId() {
+        return idProveedor;
+    }
+
+    public void setProveedorId(int proveedorId) {
+        this.idProveedor = proveedorId;
+    }
+
+    public double getPrecioVenta() {
+        return getCosto();
+    }
+
+    public void setPrecioVenta(double precioVenta) {
+        // La tabla pintura no tiene precioVenta; se conserva por compatibilidad con la UI existente.
     }
 
     public double getGanancia() {
-        return precioVenta - costo;
+        return 0.0;
     }
 
     @Override

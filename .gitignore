@@ -2,6 +2,12 @@
 .idea/
 *.iml
 
+#conexion a la base de datos
+#git update-index --assume-unchanged src/com/ipesapinturas/utils/DatabaseConnection.java
+#¿Qué hace? Le dice a Git: "Oye, haz de cuenta que este archivo no ha cambiado, ignora mis modificaciones locales".
+
+#Si en el futuro quieres volver a subir cambios de ese archivo: Solo debes revertir el comando ejecutando:
+#git update-index --no-assume-unchanged src/com/ipesapinturas/utils/DatabaseConnection.java
 # Archivos compilados
 bin/
 out/
